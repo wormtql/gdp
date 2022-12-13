@@ -1,0 +1,37 @@
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+
+// identifier
+identifier = @{ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+
+// number, from pest official book
+number = @{
+    "-"?
+    ~ ("0" | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*)
+    ~ ("." ~ ASCII_DIGIT*)?
+    ~ (^"e" ~ ("+" | "-")? ~ ASCII_DIGIT+)?
+}
+
+// string, from pest official book
+string = ${ "\"" ~ inner ~ "\"" }
+inner = @{ char* }
+char = {
+    !("\"" | "\\") ~ ANY
+    | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+    | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
+}
+
+// variable, in the form of ?x
+variable = @{ "?" ~ identifier }
+
+// value, which can appear in a query's arguments, for example, ?x, 123, "123"
+value = { number | string | variable }
+
+// a predicate that can appear in the first item of a query, for exmaple, WeaponExcelConfigData.nameTextMapHash
+predicate = @{ identifier ~ ("." ~ identifier)* }
+
+// a query is an expression
+primary_expression = { (predicate ~ value+) | ("(" ~ expression ~ ")") }
+and_expression = { primary_expression ~ ("&&" ~ primary_expression)* }
+or_expression = { and_expression ~ ("||" ~ and_expression)* }
+expression = { or_expression }
+
