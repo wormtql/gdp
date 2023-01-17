@@ -21,6 +21,7 @@ use std::env::current_dir;
 use std::io::{stdout, Write};
 use gdp::ast::parser::{MyParser, parse};
 use gdp::file_system::cached_file_system::CachedFileSystem;
+use gdp::file_system::http_file_system::HttpFileSystem;
 use gdp::file_system::naive_file_system::NaiveFileSystem;
 use gdp::query::generic_query::GenericQueries;
 use gdp::query::query::QueryProgram;
@@ -49,13 +50,15 @@ fn main() {
     } else {
         current_dir().unwrap().join(args.path)
     };
-    let fs1 = NaiveFileSystem::new(path);
+    // let fs1 = NaiveFileSystem::new(path);
+    let fs1 = HttpFileSystem::new("https://genshin-data.uigf.org/d/latest/");
     let fs2 = CachedFileSystem::new(Box::new(fs1));
     let p = QueryProgram {
         generic_query: GenericQueries::default(),
         file_system: Box::new(fs2)
     };
     // WeaponExcelConfigData ?x && WeaponExcelConfigData.nameTextMapHash ?x ?y && CHS ?y "祭礼剑"
+    // AvatarExcelConfigData.nameTextMapHash ?x ?y && CHS ?y "可莉"
 
     loop {
         print!(">>> ");
